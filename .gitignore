@@ -28,3 +28,18 @@ bin/
 
 ### Mac OS ###
 .DS_Store
+
+# Logs
+*.log
+
+# Environment
+.env
+backend/.env
+frontend/.env
+
+# Node / Vite
+frontend/node_modules/
+frontend/dist/
+
+# Java / Maven
+backend/target/
