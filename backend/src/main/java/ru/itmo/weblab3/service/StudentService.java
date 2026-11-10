@@ -206,7 +206,7 @@ public class StudentService {
         student.setDormitoryNumber(dto.getDormitoryNumber());
         student.setRoomNumber(dto.getRoomNumber());
         student.setMoveInDate(dto.getMoveInDate());
-        student.setIsForeign(dto.getForeign());
+        student.setIsForeign(dto.getIsForeign());
         student.setNotes(
                 dto.getNotes() == null ? "" : dto.getNotes()
         );

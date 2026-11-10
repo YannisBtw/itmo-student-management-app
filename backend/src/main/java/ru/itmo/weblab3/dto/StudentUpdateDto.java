@@ -94,12 +94,12 @@ public class StudentUpdateDto {
         this.moveInDate = moveInDate;
     }
 
-    public Boolean getForeign() {
+    public Boolean getIsForeign() {
         return isForeign;
     }
 
-    public void setForeign(Boolean foreign) {
-        isForeign = foreign;
+    public void setIsForeign(Boolean isForeign) {
+        this.isForeign = isForeign;
     }
 
     public String getNotes() {

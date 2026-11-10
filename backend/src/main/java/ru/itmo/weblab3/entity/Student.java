@@ -17,30 +17,29 @@ public class Student {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, length = 255)
+    @Column(name = "fullname", nullable = false, length = 255)
     private String fullName;
 
-    @Column(nullable = false, unique = true)
+    @Column(name = "isuid", nullable = false, unique = true)
     private Integer isuId;
 
     @Column(name = "student_group", nullable = false)
     private String group;
 
-    @Column(nullable = false)
+    @Column(name = "dormitorynumber", nullable = false)
     private Integer dormitoryNumber;
 
-    @Column(nullable = false)
+    @Column(name = "roomnumber", nullable = false)
     private Integer roomNumber;
 
-    @Column(nullable = false)
+    @Column(name = "moveindate", nullable = false)
     private LocalDate moveInDate;
 
-    @Column(nullable = false)
+    @Column(name = "isforeign", nullable = false)
     private Boolean isForeign;
 
-    @Column(length = 255)
+    @Column(name = "notes", length = 255)
     private String notes;
-
     protected Student() {
     }
 

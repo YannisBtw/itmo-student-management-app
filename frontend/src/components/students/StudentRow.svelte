@@ -1,6 +1,16 @@
 <script>
     import { push } from "svelte-spa-router";
     let { student } = $props();
+
+        function formatDate(value) {
+            if (!value) {
+                return "";
+            }
+
+            const [year, month, day] = value.split("-");
+
+            return `${day}-${month}-${year}`;
+        }
 </script>
 
 <tr>
@@ -9,7 +19,7 @@
     <td>{student.group}</td>
     <td>{student.dormitoryNumber}</td>
     <td>{student.roomNumber}</td>
-    <td>{student.moveInDate}</td>
+    <td>{formatDate(student.moveInDate)}</td>
     <td>{student.isForeign ? "Да" : "Нет"}</td>
     <td>
         <button
