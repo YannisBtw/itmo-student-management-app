@@ -1,66 +1,94 @@
 import { redirect } from "@sveltejs/kit";
+
 import {
-  readUser,
   readToken,
   readRefresh,
-  setAuthCookies,
-  clearAuthCookies,
-  refreshTokens
+  refreshTokens,
+  loadCurrentUser,
+  clearAuthCookies
 } from "$lib/server/auth.js";
-import { isTokenExpired } from "$lib/server/jwt.js";
+
 
 function isAdminOnlyPath(path) {
-  return path === "/students/new" || /^\/students\/[^/]+\/edit$/.test(path);
+  return path === "/students/new" ||
+      /^\/students\/[^/]+\/edit$/.test(path);
 }
+
+
+async function resolveUser(fetch, cookies) {
+  try {
+    if (readToken(cookies)) {
+      return await loadCurrentUser(fetch, cookies);
+    }
+  } catch (error) {
+    if (error.status !== 401) {
+      throw error;
+    }
+  }
+
+  if (readRefresh(cookies)) {
+    try {
+      const refreshed = await refreshTokens(fetch, cookies);
+
+      if (refreshed) {
+        return await loadCurrentUser(fetch, cookies);
+      }
+    } catch (error) {
+      if (error.status !== 401) {
+        throw error;
+      }
+    }
+  }
+
+  clearAuthCookies(cookies);
+
+  return null;
+}
+
 
 export async function handle({ event, resolve }) {
   const { cookies, url, fetch } = event;
 
-  let user = readUser(cookies);
-  let token = readToken(cookies);
-
-  if (token && isTokenExpired(token)) {
-    const refresh = readRefresh(cookies);
-
-    if (refresh) {
-      const tokens = await refreshTokens(fetch, refresh);
-
-      if (tokens) {
-        setAuthCookies(cookies, tokens);
-        user = readUser(cookies);
-        token = readToken(cookies);
-      } else {
-        clearAuthCookies(cookies);
-        user = null;
-        token = null;
-      }
-    } else {
-      clearAuthCookies(cookies);
-      user = null;
-      token = null;
-    }
-  }
+  const user = await resolveUser(fetch, cookies);
 
   event.locals.user = user;
-  event.locals.token = token;
+  event.locals.token = readToken(cookies);
 
   const path = url.pathname;
+
   const isAuth = Boolean(user);
 
-  if (isAuth && (path === "/login" || path === "/register")) {
+  const isProtectedPath =
+      path === "/students" ||
+      path.startsWith("/students/") ||
+      path === "/profile";
+
+  const isGuestPath =
+      path === "/login" ||
+      path === "/register";
+
+
+  if (isAuth && isGuestPath) {
     throw redirect(303, "/students");
   }
 
-  if (!isAuth && (path.startsWith("/students") || path.startsWith("/profile"))) {
+
+  if (!isAuth && isProtectedPath) {
     throw redirect(
-      303,
-      "/login?redirect=" + encodeURIComponent(path + url.search)
+        303,
+        "/login?redirect=" +
+        encodeURIComponent(path + url.search)
     );
   }
 
-  if (isAuth && isAdminOnlyPath(path) && user.role !== "ADMIN") {
+
+  if (isAuth &&
+      isAdminOnlyPath(path) &&
+      user.role !== "ADMIN"
+  ) {
     throw redirect(303, "/students");
   }
+
 
   return resolve(event);
 }

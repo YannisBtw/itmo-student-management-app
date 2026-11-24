@@ -54,11 +54,15 @@ services:
     build:
       context: ./frontend
 
+    environment:
+      API_BASE_URL: http://backend:8080/web-lab-3/api
+      ORIGIN: http://localhost:3000
+
     depends_on:
       - backend
 
     ports:
-      - "3000:80"
+      - "3000:3000"
 
 
 volumes:

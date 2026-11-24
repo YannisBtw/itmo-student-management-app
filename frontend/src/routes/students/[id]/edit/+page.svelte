@@ -1,15 +1,21 @@
-<script>
-  import StudentForm from "$lib/components/StudentForm.svelte";
+    <script>
+        import StudentForm from
+                    "$lib/components/StudentForm.svelte";
 
-  let { data, form } = $props();
-</script>
+        let { data, form } = $props();
+    </script>
+
 
 <section class="card">
-  <h1>Редактирование</h1>
-  <StudentForm
-    student={data.student}
-    error={form?.error}
-    submitLabel="Сохранить"
-    cancelHref={`/students/${data.student.id}`}
-  />
+
+    <h1>Редактирование студента</h1>
+
+    <StudentForm
+        student={form?.values ?? data.student}
+        error={form?.error}
+        fieldErrors={form?.fieldErrors ?? {}}
+        submitLabel="Сохранить"
+        cancelHref={`/students/${data.student.id}`}
+    />
+
 </section>

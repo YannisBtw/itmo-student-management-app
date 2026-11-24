@@ -1,44 +1,108 @@
+import { createHash } from "node:crypto";
+
 import { apiRequest } from "./api.js";
 
-export function listStudents(fetch, token, query) {
-  return apiRequest(fetch, {
-    method: "QUERY",
-    path: "/students",
-    query,
-    token
-  });
+import { getCached, clearCache } from "./cache.js";
+
+
+function createCacheKey(token, type, params) {
+
+  const tokenHash = createHash("sha256")
+      .update(token)
+      .digest("hex");
+
+  return JSON.stringify([
+    tokenHash,
+    type,
+    params
+  ]);
 }
 
+
+export function listStudents(fetch, token, query) {
+
+  const loader = () => apiRequest(fetch, {
+    method: "QUERY",
+    path: "/students",
+    body: query,
+    token
+  });
+
+  if (!token) {
+    return loader();
+  }
+
+  const key = createCacheKey(
+      token,
+      "students",
+      query
+  );
+
+  return getCached(key, loader);
+}
+
+
 export function getStudent(fetch, token, id) {
-  return apiRequest(fetch, {
+
+  const loader = () => apiRequest(fetch, {
     method: "GET",
     path: `/students/${id}`,
     token
   });
+
+  if (!token) {
+    return loader();
+  }
+
+  const key = createCacheKey(
+      token,
+      "student",
+      String(id)
+  );
+
+  return getCached(key, loader);
 }
 
-export function createStudent(fetch, token, payload) {
-  return apiRequest(fetch, {
+
+export async function createStudent(fetch, token, payload) {
+
+  const result = await apiRequest(fetch, {
     method: "POST",
     path: "/students",
     body: payload,
     token
   });
+
+  clearCache();
+
+  return result;
 }
 
-export function updateStudent(fetch, token, id, payload) {
-  return apiRequest(fetch, {
+
+export async function updateStudent(fetch, token, id, payload) {
+
+  const result = await apiRequest(fetch, {
     method: "PUT",
     path: `/students/${id}`,
     body: payload,
     token
   });
+
+  clearCache();
+
+  return result;
 }
 
-export function deleteStudent(fetch, token, id) {
-  return apiRequest(fetch, {
+
+export async function deleteStudent(fetch, token, id) {
+
+  const result = await apiRequest(fetch, {
     method: "DELETE",
     path: `/students/${id}`,
     token
   });
+
+  clearCache();
+
+  return result;
 }

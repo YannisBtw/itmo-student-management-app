@@ -1,104 +1,218 @@
-<script>
-  import { goto, invalidateAll } from "$app/navigation";
-  import { page } from "$app/state";
+    <script>
+        import { onMount } from "svelte";
 
-  let { data } = $props();
+        import {
+            Subject,
+            debounce,
+            distinctUntilChanged,
+            filter,
+            timer,
+            of
+        } from "rxjs";
 
-  let q = $state(data.query.q);
-  let timer = null;
+        import {
+            goto,
+            beforeNavigate,
+            afterNavigate
+        } from "$app/navigation";
 
-  function buildParams(overrides) {
-    const params = new URLSearchParams(page.url.searchParams);
-    Object.entries(overrides).forEach(([key, value]) => {
-      if (value) params.set(key, value);
-      else params.delete(key);
-    });
-    return params.toString();
-  }
+        import { page } from "$app/state";
 
-  function onSearchInput(event) {
-    q = event.currentTarget.value;
-    if (timer) clearTimeout(timer);
-    timer = setTimeout(() => {
-      const qs = buildParams({ q, page: "0" });
-      goto(`?${qs}`, { keepFocus: true, noScroll: true, replaceState: true });
-    }, 300);
-  }
+        import StudentTable from
+                    "$lib/components/students/StudentTable.svelte";
 
-  function setParam(name, value) {
-    const overrides = { [name]: value };
-    if (name !== "page") overrides.page = "0";
-    const qs = buildParams(overrides);
-    goto(`?${qs}`, { keepFocus: true, noScroll: true });
-  }
+        import StudentFilters from
+                    "$lib/components/students/StudentFilters.svelte";
 
-  let students = $derived(
-    Array.isArray(data.students)
-      ? data.students
-      : data.students?.content ?? []
-  );
-  let totalElements = $derived(data.students?.totalElements ?? students.length);
-  let totalPages = $derived(data.students?.totalPages ?? 1);
-  let currentPage = $derived(Number(data.query.page) || 0);
-</script>
+        import Pagination from
+                    "$lib/components/students/Pagination.svelte";
+
+
+        let { data } = $props();
+
+        const filters$ = new Subject();
+
+        let filterVersion = $state(0);
+
+        let students = $derived(data.students);
+
+        let query = $derived(data.query);
+
+        let currentPage = $derived(query.page);
+
+        let pageSize = $derived(query.size);
+
+        let hasNext = $derived(
+                students.length === pageSize
+        );
+
+        let isAdmin = $derived(
+                data.user?.role === "ADMIN"
+        );
+
+
+        function navigateToQuery(nextQuery) {
+            const params = new URLSearchParams();
+
+            for (const [key, value] of Object.entries(nextQuery)) {
+                if (
+                        value !== undefined &&
+                        value !== null &&
+                        value !== ""
+                ) {
+                    params.set(key, String(value));
+                }
+            }
+
+            const url = `${page.url.pathname}?${params.toString()}`;
+
+            return goto(url, {
+                keepFocus: true,
+                noScroll: true
+            });
+        }
+
+
+        function handleFiltersChange(nextFilters) {
+            filters$.next(nextFilters);
+        }
+
+
+        function handlePrev() {
+            if (currentPage === 0) {
+                return;
+            }
+
+            return navigateToQuery({
+                ...query,
+                page: currentPage - 1
+            });
+        }
+
+
+        function handleNext() {
+            if (!hasNext) {
+                return;
+            }
+
+            return navigateToQuery({
+                ...query,
+                page: currentPage + 1
+            });
+        }
+
+
+        function handlePageSizeChange(nextSize) {
+            return navigateToQuery({
+                ...query,
+                page: 0,
+                size: nextSize
+            });
+        }
+
+
+        function isOptionalInteger(value, min, max) {
+            return value === undefined ||
+                    (
+                            Number.isInteger(value) &&
+                            value >= min &&
+                            value <= max
+                    );
+        }
+
+
+        function areFiltersValid(filters) {
+            return (
+                    isOptionalInteger(
+                            filters.isuId, 100000, 999999
+                    ) &&
+
+                    isOptionalInteger(
+                            filters.dormitoryNumber, 1, 99
+                    ) &&
+
+                    isOptionalInteger(
+                            filters.roomNumber, 1, 9999
+                    )
+            );
+        }
+
+
+        onMount(() => {
+            const subscription = filters$.pipe(
+
+                    debounce((filters) =>
+                            filters === null
+                                    ? of(0)
+                                    : timer(300)
+                    ),
+
+                    distinctUntilChanged((previous, current) =>
+                            previous !== null &&
+                            current !== null &&
+                            JSON.stringify(previous) ===
+                            JSON.stringify(current)
+                    ),
+
+                    filter((filters) =>
+                            filters !== null &&
+                            areFiltersValid(filters)
+                    )
+
+            ).subscribe((nextFilters) => {
+
+                navigateToQuery({
+                    ...nextFilters,
+                    page: 0,
+                    size: pageSize
+                }).catch(console.error);
+
+            });
+
+            return () => {
+                subscription.unsubscribe();
+                filters$.complete();
+            };
+        });
+    </script>
+
 
 <section>
-  <div class="toolbar">
-    <h1>Студенты</h1>
-    {#if data.user?.role === "ADMIN"}
-      <a href="/students/new" class="button">Добавить</a>
-    {/if}
-  </div>
+    <div class="toolbar">
+        <h1>Студенты</h1>
 
-  <div class="filters">
-    <input
-      type="search"
-      placeholder="Поиск по ФИО"
-      value={q}
-      oninput={onSearchInput}
-    />
-    <select
-      value={data.query.sort}
-      onchange={(e) => setParam("sort", e.currentTarget.value)}
-    >
-      <option value="">Без сортировки</option>
-      <option value="fullName">По ФИО</option>
-      <option value="groupName">По группе</option>
-    </select>
-    <select
-      value={data.query.order}
-      onchange={(e) => setParam("order", e.currentTarget.value)}
-    >
-      <option value="">Порядок</option>
-      <option value="asc">По возрастанию</option>
-      <option value="desc">По убыванию</option>
-    </select>
-  </div>
-
-  {#if students.length === 0}
-    <p class="hint">Студентов не найдено</p>
-  {:else}
-    <ul class="list">
-      {#each students as s (s.id)}
-        <li>
-          <a href={`/students/${s.id}`}>{s.fullName ?? s.name}</a>
-          <span>{s.groupName ?? s.group ?? ""}</span>
-        </li>
-      {/each}
-    </ul>
-
-    <div class="pager">
-      <button
-        disabled={currentPage <= 0}
-        onclick={() => setParam("page", String(currentPage - 1))}
-      >Назад</button>
-      <span>
-        Страница {currentPage + 1} из {totalPages} · всего {totalElements}
-      </span>
-      <button
-        disabled={currentPage + 1 >= totalPages}
-        onclick={() => setParam("page", String(currentPage + 1))}
-      >Вперёд</button>
+      {#if isAdmin}
+        <a href="/students/new" class="button">
+            Добавить студента
+        </a>
+      {/if}
     </div>
-  {/if}
+
+    <StudentFilters
+        {query}
+        onfilterschange={handleFiltersChange}
+    />
+
+    <StudentTable {students} />
+
+    <Pagination
+        page={currentPage}
+{pageSize}
+{hasNext}
+        onprev={handlePrev}
+        onnext={handleNext}
+        onpagesizechange={handlePageSizeChange}
+    />
 </section>
+
+
+<style>
+    .toolbar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+    }
+</style>

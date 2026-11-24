@@ -86,14 +86,33 @@ async function parseBody(response) {
 }
 
 export async function apiRequest(
-  fetch,
-  { method = "GET", path, query, body, token, auth = true }
+    fetch,
+    {
+      method = "GET",
+      path,
+      query,
+      body,
+      token,
+      auth = true,
+      cookieHeader,
+      raw = false
+    }
 ) {
   const url = buildUrl(path, query);
-  const headers = { Accept: "application/json" };
 
-  if (body !== undefined) headers["Content-Type"] = "application/json";
-  if (auth && token) headers["Authorization"] = "Bearer " + token;
+  const headers = {
+    Accept: "application/json"
+  };
+
+  if (body !== undefined) {
+    headers["Content-Type"] = "application/json";
+  }
+
+  if (cookieHeader) {
+    headers["Cookie"] = cookieHeader;
+  } else if (auth && token) {
+    headers["Cookie"] = `access_token=${token}`;
+  }
 
   let response;
 
@@ -101,7 +120,9 @@ export async function apiRequest(
     response = await fetch(url, {
       method,
       headers,
-      body: body === undefined ? undefined : JSON.stringify(body)
+      body: body === undefined
+          ? undefined
+          : JSON.stringify(body)
     });
   } catch {
     throw new ApiError(0, "Network error");
@@ -110,10 +131,14 @@ export async function apiRequest(
   if (!response.ok) {
     const payload = await parseBody(response);
 
-    throw new ApiError(response.status, payload?.message ?? "", {
-      details: payload?.details ?? null
-    });
+    throw new ApiError(
+        response.status,
+        payload?.message ?? "",
+        {
+          details: payload?.details ?? null
+        }
+    );
   }
 
-  return parseBody(response);
+  return raw ? response : parseBody(response);
 }

@@ -1,83 +1,130 @@
-<script>
-    let {
-        onfilterschange
-    } = $props();
+    <script>
+        let {
+            query = {},
+            onfilterschange
+        } = $props();
 
 
-    let fullName = $state("");
-    let isuId = $state("");
-    let group = $state("");
-    let dormitoryNumber = $state("");
-    let roomNumber = $state("");
-    let moveInDate = $state("");
-    let isForeign = $state("");
-    let notes = $state("");
+        function formatDateForInput(value) {
+            if (!value) {
+                return "";
+            }
 
-    let sortBy = $state("id");
-    let sortDirection = $state("asc");
+            const [day, month, year] = value.split("-");
 
-
-    function formatDateForBackend(value) {
-        if (!value) {
-            return undefined;
+            return `${year}-${month}-${day}`;
         }
 
-        const [year, month, day] = value.split("-");
 
-        return `${day}-${month}-${year}`;
-    }
+        let fullName = $state(query.fullName ?? "");
+        let isuId = $state(query.isuId ?? "");
+        let group = $state(query.group ?? "");
+        let dormitoryNumber = $state(query.dormitoryNumber ?? "");
+        let roomNumber = $state(query.roomNumber ?? "");
+
+        let moveInDate = $state(
+          formatDateForInput(query.moveInDate)
+        );
+
+        let isForeign = $state(
+          query.isForeign === undefined
+            ? ""
+            : String(query.isForeign)
+        );
+
+        let notes = $state(query.notes ?? "");
+
+        let sortBy = $state(query.sortBy ?? "id");
+        let sortDirection = $state(query.sortDirection ?? "asc");
 
 
-    function notifyFiltersChange() {
-        onfilterschange?.({
-            fullName: fullName.trim(),
+        function formatDateForBackend(value) {
+            if (!value) {
+                return undefined;
+            }
 
-            isuId: isuId
-                ? Number(isuId)
-                : undefined,
+            const [year, month, day] = value.split("-");
 
-            group: group.trim(),
+            return `${day}-${month}-${year}`;
+        }
 
-            dormitoryNumber: dormitoryNumber
-                ? Number(dormitoryNumber)
-                : undefined,
 
-            roomNumber: roomNumber
-                ? Number(roomNumber)
-                : undefined,
+        function notifyFiltersChange() {
+            onfilterschange?.({
+                fullName: fullName.trim(),
 
-            moveInDate:
-                formatDateForBackend(moveInDate),
+                isuId: isuId
+                  ? Number(isuId)
+                  : undefined,
 
-            isForeign:
-                isForeign === ""
+                group: group.trim(),
+
+                dormitoryNumber: dormitoryNumber
+                  ? Number(dormitoryNumber)
+                  : undefined,
+
+                roomNumber: roomNumber
+                  ? Number(roomNumber)
+                  : undefined,
+
+                moveInDate:
+                  formatDateForBackend(moveInDate),
+
+                isForeign:
+                  isForeign === ""
                     ? undefined
                     : isForeign === "true",
 
-            notes: notes.trim(),
+                notes: notes.trim(),
 
-            sortBy,
-            sortDirection
-        });
-    }
+                sortBy,
+                sortDirection
+            });
+        }
 
 
-    function handleReset() {
-        fullName = "";
-        isuId = "";
-        group = "";
-        dormitoryNumber = "";
-        roomNumber = "";
-        moveInDate = "";
-        isForeign = "";
-        notes = "";
+        function handleReset() {
+            fullName = "";
+            isuId = "";
+            group = "";
+            dormitoryNumber = "";
+            roomNumber = "";
+            moveInDate = "";
+            isForeign = "";
+            notes = "";
 
-        sortBy = "id";
-        sortDirection = "asc";
+            sortBy = "id";
+            sortDirection = "asc";
 
-        notifyFiltersChange();
-    }
-</script>
+            notifyFiltersChange();
+        }
+
+
+        let isuInvalid = $derived(
+                isuId !== "" &&
+                !/^[1-9]\d{5}$/.test(String(isuId))
+        );
+
+
+        let dormitoryInvalid = $derived(
+                dormitoryNumber !== "" &&
+                (
+                        !Number.isInteger(Number(dormitoryNumber)) ||
+                        Number(dormitoryNumber) < 1 ||
+                        Number(dormitoryNumber) > 99
+                )
+        );
+
+
+        let roomInvalid = $derived(
+                roomNumber !== "" &&
+                (
+                        !Number.isInteger(Number(roomNumber)) ||
+                        Number(roomNumber) < 1 ||
+                        Number(roomNumber) > 9999
+                )
+        );
+    </script>
 
 
 <div class="filter-form">
@@ -99,6 +146,12 @@
 
         <label>
             ИСУ
+
+          {#if isuInvalid}
+            <span class="field-error">
+              ИСУ должен состоять из 6 цифр
+            </span>
+          {/if}
 
             <input
                     type="number"
@@ -130,6 +183,12 @@
         <label>
             Общежитие
 
+          {#if dormitoryInvalid}
+            <span class="field-error">
+              Допустимые значения: от 1 до 99
+            </span>
+          {/if}
+
             <input
                     type="number"
                     value={dormitoryNumber}
@@ -145,6 +204,12 @@
 
         <label>
             Комната
+
+          {#if roomInvalid}
+            <span class="field-error">
+              Допустимые значения: от 1 до 9999
+            </span>
+          {/if}
 
             <input
                     type="number"
@@ -310,4 +375,9 @@
         padding: 0.5rem 0.8rem;
         cursor: pointer;
     }
+
+    .field-error {
+    color: #c62828;
+    font-size: 0.8rem;
+}
 </style>

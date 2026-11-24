@@ -1,6 +1,6 @@
-<script>
-    import { push } from "svelte-spa-router";
-    let { student } = $props();
+    <script>
+        let { student } = $props();
+
 
         function formatDate(value) {
             if (!value) {
@@ -11,7 +11,8 @@
 
             return `${day}-${month}-${year}`;
         }
-</script>
+    </script>
+
 
 <tr>
     <td>{student.fullName}</td>
@@ -21,15 +22,14 @@
     <td>{student.roomNumber}</td>
     <td>{formatDate(student.moveInDate)}</td>
     <td>{student.isForeign ? "Да" : "Нет"}</td>
+
     <td>
-        <button
-                type="button"
-                onclick={() => push(`/students/${student.id}`)}
-        >
+        <a href={`/students/${student.id}`}>
             Подробнее
-        </button>
+        </a>
     </td>
 </tr>
+
 
 <style>
     td {
@@ -38,7 +38,8 @@
         text-align: left;
     }
 
-    button {
+    a {
+        display: inline-block;
         padding: 0.45rem 0.75rem;
         cursor: pointer;
     }

@@ -57,6 +57,7 @@
         align-items: center;
         gap: 1rem;
         margin-top: 1.5rem;
+        flex-wrap: wrap;
     }
 
     button,
