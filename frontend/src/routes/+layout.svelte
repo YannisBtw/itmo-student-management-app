@@ -3,10 +3,10 @@
 
         import Header from "$lib/components/Header.svelte";
 
-        import { navigating } from "$app/state";
+        import {navigating} from "$app/state";
 
 
-        let { data, children } = $props();
+        let {data, children} = $props();
 
         let loading = $derived(navigating.to !== null);
     </script>
@@ -21,7 +21,7 @@
 {/if}
 
 
-<Header user={data.user} />
+<Header user={ data.user } />
 
 
 <main class="page">

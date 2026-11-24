@@ -2,20 +2,17 @@
         import StudentForm from
                     "$lib/components/StudentForm.svelte";
 
-        let { form } = $props();
+        let {form} = $props();
     </script>
 
 
 <section class="card">
 
-    <h1>Новый студент</h1>
-
-    <StudentForm
-        student={form?.values ?? null}
-        error={form?.error}
-        fieldErrors={form?.fieldErrors ?? {}}
-        submitLabel="Создать"
-        cancelHref="/students"
+    <h1>Новый студент</h1>{ form?.values ?? null }
+    error={ form?.error }
+    fieldErrors={ form?.fieldErrors ?? {} }
+    submitLabel="Создать"
+    cancelHref="/students"
     />
 
 </section>

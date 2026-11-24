@@ -23,13 +23,13 @@
         let roomNumber = $state(query.roomNumber ?? "");
 
         let moveInDate = $state(
-          formatDateForInput(query.moveInDate)
+                formatDateForInput(query.moveInDate)
         );
 
         let isForeign = $state(
-          query.isForeign === undefined
-            ? ""
-            : String(query.isForeign)
+                query.isForeign === undefined
+                        ? ""
+                        : String(query.isForeign)
         );
 
         let notes = $state(query.notes ?? "");
@@ -54,26 +54,26 @@
                 fullName: fullName.trim(),
 
                 isuId: isuId
-                  ? Number(isuId)
-                  : undefined,
+                        ? Number(isuId)
+                        : undefined,
 
                 group: group.trim(),
 
                 dormitoryNumber: dormitoryNumber
-                  ? Number(dormitoryNumber)
-                  : undefined,
+                        ? Number(dormitoryNumber)
+                        : undefined,
 
                 roomNumber: roomNumber
-                  ? Number(roomNumber)
-                  : undefined,
+                        ? Number(roomNumber)
+                        : undefined,
 
                 moveInDate:
-                  formatDateForBackend(moveInDate),
+                        formatDateForBackend(moveInDate),
 
                 isForeign:
-                  isForeign === ""
-                    ? undefined
-                    : isForeign === "true",
+                        isForeign === ""
+                                ? undefined
+                                : isForeign === "true",
 
                 notes: notes.trim(),
 
@@ -134,12 +134,10 @@
 
             <input
                     type="text"
-                    value={fullName}
+                    value={ fullName }
                     placeholder="Иванов"
-                    oninput={(event) => {
-                        fullName = event.currentTarget.value;
-                        notifyFiltersChange();
-                    }}
+                    oninput={ (event) => { fullName = event.currentTarget.value;
+                        notifyFiltersChange(); } }
             />
         </label>
 
@@ -155,12 +153,10 @@
 
             <input
                     type="number"
-                    value={isuId}
+                    value={ isuId }
                     placeholder="123456"
-                    oninput={(event) => {
-                        isuId = event.currentTarget.value;
-                        notifyFiltersChange();
-                    }}
+                    oninput={ (event) => { isuId = event.currentTarget.value;
+                        notifyFiltersChange(); } }
             />
         </label>
 
@@ -170,12 +166,10 @@
 
             <input
                     type="text"
-                    value={group}
+                    value={ group }
                     placeholder="P3120"
-                    oninput={(event) => {
-                        group = event.currentTarget.value;
-                        notifyFiltersChange();
-                    }}
+                    oninput={ (event) => { group = event.currentTarget.value;
+                        notifyFiltersChange(); } }
             />
         </label>
 
@@ -191,13 +185,11 @@
 
             <input
                     type="number"
-                    value={dormitoryNumber}
-                    oninput={(event) => {
-                        dormitoryNumber =
+                    value={ dormitoryNumber }
+                    oninput={ (event) => { dormitoryNumber =
                             event.currentTarget.value;
 
-                        notifyFiltersChange();
-                    }}
+                        notifyFiltersChange(); } }
             />
         </label>
 
@@ -213,13 +205,11 @@
 
             <input
                     type="number"
-                    value={roomNumber}
-                    oninput={(event) => {
-                        roomNumber =
+                    value={ roomNumber }
+                    oninput={ (event) => { roomNumber =
                             event.currentTarget.value;
 
-                        notifyFiltersChange();
-                    }}
+                        notifyFiltersChange(); } }
             />
         </label>
 
@@ -229,13 +219,11 @@
 
             <input
                     type="date"
-                    value={moveInDate}
-                    onchange={(event) => {
-                        moveInDate =
+                    value={ moveInDate }
+                    onchange={ (event) => { moveInDate =
                             event.currentTarget.value;
 
-                        notifyFiltersChange();
-                    }}
+                        notifyFiltersChange(); } }
             />
         </label>
 
@@ -244,13 +232,11 @@
             Иностранец
 
             <select
-                    value={isForeign}
-                    onchange={(event) => {
-                        isForeign =
+                    value={ isForeign }
+                    onchange={ (event) => { isForeign =
                             event.currentTarget.value;
 
-                        notifyFiltersChange();
-                    }}
+                        notifyFiltersChange(); } }
             >
                 <option value="">Все</option>
                 <option value="true">Да</option>
@@ -264,11 +250,9 @@
 
             <input
                     type="text"
-                    value={notes}
-                    oninput={(event) => {
-                        notes = event.currentTarget.value;
-                        notifyFiltersChange();
-                    }}
+                    value={ notes }
+                    oninput={ (event) => { notes = event.currentTarget.value;
+                        notifyFiltersChange(); } }
             />
         </label>
 
@@ -277,13 +261,11 @@
             Сортировать по
 
             <select
-                    value={sortBy}
-                    onchange={(event) => {
-                        sortBy =
+                    value={ sortBy }
+                    onchange={ (event) => { sortBy =
                             event.currentTarget.value;
 
-                        notifyFiltersChange();
-                    }}
+                        notifyFiltersChange(); } }
             >
                 <option value="id">ID</option>
                 <option value="fullName">ФИО</option>
@@ -308,13 +290,11 @@
             Направление
 
             <select
-                    value={sortDirection}
-                    onchange={(event) => {
-                        sortDirection =
+                    value={ sortDirection }
+                    onchange={ (event) => { sortDirection =
                             event.currentTarget.value;
 
-                        notifyFiltersChange();
-                    }}
+                        notifyFiltersChange(); } }
             >
                 <option value="asc">
                     По возрастанию
@@ -331,7 +311,7 @@
     <div class="actions">
         <button
                 type="button"
-                onclick={handleReset}
+                onclick={ handleReset }
         >
             Сбросить
         </button>

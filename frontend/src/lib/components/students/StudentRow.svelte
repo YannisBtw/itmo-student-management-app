@@ -1,5 +1,5 @@
     <script>
-        let { student } = $props();
+        let {student} = $props();
 
 
         function formatDate(value) {
@@ -24,7 +24,7 @@
     <td>{student.isForeign ? "Да" : "Нет"}</td>
 
     <td>
-        <a href={`/students/${student.id}`}>
+        <a href={ `/students/${student.id}` }>
             Подробнее
         </a>
     </td>

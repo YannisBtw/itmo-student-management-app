@@ -1,94 +1,94 @@
-import { redirect } from "@sveltejs/kit";
+import {redirect} from "@sveltejs/kit";
 
 import {
-  readToken,
-  readRefresh,
-  refreshTokens,
-  loadCurrentUser,
-  clearAuthCookies
+    readToken,
+    readRefresh,
+    refreshTokens,
+    loadCurrentUser,
+    clearAuthCookies
 } from "$lib/server/auth.js";
 
 
 function isAdminOnlyPath(path) {
-  return path === "/students/new" ||
-      /^\/students\/[^/]+\/edit$/.test(path);
+    return path === "/students/new" ||
+        /^\/students\/[^/]+\/edit$/.test(path);
 }
 
 
 async function resolveUser(fetch, cookies) {
-  try {
-    if (readToken(cookies)) {
-      return await loadCurrentUser(fetch, cookies);
-    }
-  } catch (error) {
-    if (error.status !== 401) {
-      throw error;
-    }
-  }
-
-  if (readRefresh(cookies)) {
     try {
-      const refreshed = await refreshTokens(fetch, cookies);
-
-      if (refreshed) {
-        return await loadCurrentUser(fetch, cookies);
-      }
+        if (readToken(cookies)) {
+            return await loadCurrentUser(fetch, cookies);
+        }
     } catch (error) {
-      if (error.status !== 401) {
-        throw error;
-      }
+        if (error.status !== 401) {
+            throw error;
+        }
     }
-  }
 
-  clearAuthCookies(cookies);
+    if (readRefresh(cookies)) {
+        try {
+            const refreshed = await refreshTokens(fetch, cookies);
 
-  return null;
+            if (refreshed) {
+                return await loadCurrentUser(fetch, cookies);
+            }
+        } catch (error) {
+            if (error.status !== 401) {
+                throw error;
+            }
+        }
+    }
+
+    clearAuthCookies(cookies);
+
+    return null;
 }
 
 
-export async function handle({ event, resolve }) {
-  const { cookies, url, fetch } = event;
+export async function handle({event, resolve}) {
+    const {cookies, url, fetch} = event;
 
-  const user = await resolveUser(fetch, cookies);
+    const user = await resolveUser(fetch, cookies);
 
-  event.locals.user = user;
-  event.locals.token = readToken(cookies);
+    event.locals.user = user;
+    event.locals.token = readToken(cookies);
 
-  const path = url.pathname;
+    const path = url.pathname;
 
-  const isAuth = Boolean(user);
+    const isAuth = Boolean(user);
 
-  const isProtectedPath =
-      path === "/students" ||
-      path.startsWith("/students/") ||
-      path === "/profile";
+    const isProtectedPath =
+        path === "/students" ||
+        path.startsWith("/students/") ||
+        path === "/profile";
 
-  const isGuestPath =
-      path === "/login" ||
-      path === "/register";
-
-
-  if (isAuth && isGuestPath) {
-    throw redirect(303, "/students");
-  }
+    const isGuestPath =
+        path === "/login" ||
+        path === "/register";
 
 
-  if (!isAuth && isProtectedPath) {
-    throw redirect(
-        303,
-        "/login?redirect=" +
-        encodeURIComponent(path + url.search)
-    );
-  }
+    if (isAuth && isGuestPath) {
+        throw redirect(303, "/students");
+    }
 
 
-  if (isAuth &&
-      isAdminOnlyPath(path) &&
-      user.role !== "ADMIN"
-  ) {
-    throw redirect(303, "/students");
-  }
+    if (!isAuth && isProtectedPath) {
+        throw redirect(
+            303,
+            "/login?redirect=" +
+            encodeURIComponent(path + url.search)
+        );
+    }
 
 
-  return resolve(event);
+    if (isAuth &&
+        isAdminOnlyPath(path) &&
+        user.role !== "ADMIN"
+    ) {
+        throw redirect(303, "/students");
+    }
+
+
+    return resolve(event);
 }

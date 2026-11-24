@@ -1,6 +1,6 @@
-<script>
-  import { page } from "$app/state";
-</script>
+    <script>
+        import {page} from "$app/state";
+    </script>
 
 <section class="card error-page">
   {#if page.status === 404}
@@ -13,9 +13,9 @@
     <h1>Требуется вход</h1>
     <p>Войдите в систему, чтобы продолжить.</p>
   {:else}
-    <h1>Ошибка {page.status}</h1>
+    <h1>Ошибка { page.status }</h1>
     <p>{page.error?.message ?? "Что-то пошло не так."}</p>
   {/if}
 
-  <a href="/students" class="button">На главную</a>
+    <a href="/students" class="button">На главную</a>
 </section>

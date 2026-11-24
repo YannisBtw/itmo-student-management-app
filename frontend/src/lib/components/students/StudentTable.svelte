@@ -1,7 +1,7 @@
     <script>
         import StudentRow from "./StudentRow.svelte";
 
-        let { students = [] } = $props();
+        let {students = []} = $props();
     </script>
 
 
@@ -24,8 +24,8 @@
             </thead>
 
             <tbody>
-                {#each students as student (student.id)}
-                    <StudentRow {student} />
+              {#each students as student (student.id)}
+                    <StudentRow { student } />
                 {/each}
             </tbody>
         </table>

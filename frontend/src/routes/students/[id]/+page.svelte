@@ -1,7 +1,7 @@
     <script>
-        import { enhance } from "$app/forms";
+        import {enhance} from "$app/forms";
 
-        let { data, form } = $props();
+        let {data, form} = $props();
 
         let student = $derived(data.student);
 
@@ -33,7 +33,7 @@
         <div class="row">
 
             <a
-                    href={`/students/${student.id}/edit`}
+                    href={ `/students/${student.id}/edit` }
                     class="button"
             >
                 Редактировать
@@ -42,28 +42,17 @@
             <form
                     method="POST"
                     action="?/delete"
-            use:enhance={({ cancel }) => {
-
-            if (!confirm("Удалить студента?")) {
-            cancel();
-                            return;
-            }
+            use:enhance={ ({ cancel }) => { if (!confirm("Удалить студента?")) { cancel();
+                            return; }
 
                         deleting = true;
 
-                        return async ({ update }) => {
-            try {
-            await update();
-            } finally {
-            deleting = false;
-            }
-            };
-            }}
+                        return async ({ update }) => { try { await update(); } finally { deleting = false; } }; } }
             >
                 <button
                         type="submit"
                         class="button danger"
-                        disabled={deleting}
+                        disabled={ deleting }
                 >
                 {deleting
                             ? "Удаление..."

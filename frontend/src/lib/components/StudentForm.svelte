@@ -1,5 +1,5 @@
     <script>
-        import { enhance } from "$app/forms";
+        import {enhance} from "$app/forms";
 
         let {
             student = null,
@@ -23,17 +23,9 @@
 <form
         method="POST"
         class="form"
-use:enhance={() => {
-submitting = true;
+use:enhance={ () => { submitting = true;
 
-        return async ({ update }) => {
-try {
-await update({ reset: false });
-} finally {
-submitting = false;
-}
-};
-}}
+        return async ({ update }) => { try { await update({ reset: false }); } finally { submitting = false; } }; } }
 >
     <label>
         ФИО
@@ -41,7 +33,7 @@ submitting = false;
         <input
                 name="fullName"
                 type="text"
-                value={student?.fullName ?? ""}
+                value={ student?.fullName ?? "" }
                 maxlength="255"
                 required
         />
@@ -60,7 +52,7 @@ submitting = false;
         <input
                 name="isuId"
                 type="number"
-                value={student?.isuId ?? ""}
+                value={ student?.isuId ?? "" }
                 min="100000"
                 max="999999"
                 required
@@ -80,8 +72,8 @@ submitting = false;
         <input
                 name="group"
                 type="text"
-                value={student?.group ?? ""}
-                pattern={"[A-Z][1-9][1-4][0-9]{2}"}
+                value={ student?.group ?? "" }
+                pattern={ "[A-Z][1-9][1-4][0-9]{2}" }
                 placeholder="P3120"
                 required
         />
@@ -100,7 +92,7 @@ submitting = false;
         <input
                 name="dormitoryNumber"
                 type="number"
-                value={student?.dormitoryNumber ?? ""}
+                value={ student?.dormitoryNumber ?? "" }
                 min="1"
                 max="99"
                 required
@@ -120,7 +112,7 @@ submitting = false;
         <input
                 name="roomNumber"
                 type="number"
-                value={student?.roomNumber ?? ""}
+                value={ student?.roomNumber ?? "" }
                 min="1"
                 max="9999"
                 required
@@ -140,7 +132,7 @@ submitting = false;
         <input
                 name="moveInDate"
                 type="date"
-                value={student?.moveInDate ?? ""}
+                value={ student?.moveInDate ?? "" }
                 required
         />
 
@@ -157,7 +149,7 @@ submitting = false;
 
         <select
                 name="isForeign"
-                value={String(student?.isForeign ?? "")}
+                value={ String(student?.isForeign ?? "") }
                 required
         >
             <option value="">Выберите</option>
@@ -178,7 +170,7 @@ submitting = false;
 
         <textarea
                 name="notes"
-                value={student?.notes ?? ""}
+                value={ student?.notes ?? "" }
                 maxlength="255"
                 rows="4"
         ></textarea>
@@ -196,14 +188,14 @@ submitting = false;
         <button
                 type="submit"
                 class="button"
-                disabled={submitting}
+                disabled={ submitting }
         >
         {submitting
                 ? "Сохранение..."
                 : submitLabel}
         </button>
 
-        <a href={cancelHref} class="button">
+        <a href={ cancelHref } class="button">
             Отмена
         </a>
 

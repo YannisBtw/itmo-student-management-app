@@ -1,32 +1,32 @@
-<script>
-    let {
-        page,
-        pageSize,
-        hasNext,
-        onprev,
-        onnext,
-        onpagesizechange
-    } = $props();
-</script>
+    <script>
+        let {
+            page,
+            pageSize,
+            hasNext,
+            onprev,
+            onnext,
+            onpagesizechange
+        } = $props();
+    </script>
 
 
 <div class="pagination">
     <button
             type="button"
-            onclick={onprev}
-            disabled={page === 0}
+            onclick={ onprev }
+            disabled={ page === 0 }
     >
         ← Назад
     </button>
 
     <span>
-        Страница {page + 1}
+        Страница { page + 1 }
     </span>
 
     <button
             type="button"
-            onclick={onnext}
-            disabled={!hasNext}
+            onclick={ onnext }
+            disabled={ !hasNext }
     >
         Вперёд →
     </button>
@@ -35,12 +35,11 @@
         На странице:
 
         <select
-                value={pageSize}
-                onchange={(event) =>
+                value={ pageSize }
+                onchange={ (event) =>
                 onpagesizechange(
                     Number(event.currentTarget.value)
-                )
-            }
+                ) }
         >
             <option value="5">5</option>
             <option value="10">10</option>

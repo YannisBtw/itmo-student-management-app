@@ -1,108 +1,108 @@
-import { createHash } from "node:crypto";
+import {createHash} from "node:crypto";
 
-import { apiRequest } from "./api.js";
+import {apiRequest} from "./api.js";
 
-import { getCached, clearCache } from "./cache.js";
+import {getCached, clearCache} from "./cache.js";
 
 
 function createCacheKey(token, type, params) {
 
-  const tokenHash = createHash("sha256")
-      .update(token)
-      .digest("hex");
+    const tokenHash = createHash("sha256")
+        .update(token)
+        .digest("hex");
 
-  return JSON.stringify([
-    tokenHash,
-    type,
-    params
-  ]);
+    return JSON.stringify([
+        tokenHash,
+        type,
+        params
+    ]);
 }
 
 
 export function listStudents(fetch, token, query) {
 
-  const loader = () => apiRequest(fetch, {
-    method: "QUERY",
-    path: "/students",
-    body: query,
-    token
-  });
+    const loader = () => apiRequest(fetch, {
+        method: "QUERY",
+        path: "/students",
+        body: query,
+        token
+    });
 
-  if (!token) {
-    return loader();
-  }
+    if (!token) {
+        return loader();
+    }
 
-  const key = createCacheKey(
-      token,
-      "students",
-      query
-  );
+    const key = createCacheKey(
+        token,
+        "students",
+        query
+    );
 
-  return getCached(key, loader);
+    return getCached(key, loader);
 }
 
 
 export function getStudent(fetch, token, id) {
 
-  const loader = () => apiRequest(fetch, {
-    method: "GET",
-    path: `/students/${id}`,
-    token
-  });
+    const loader = () => apiRequest(fetch, {
+        method: "GET",
+        path: `/students/${id}`,
+        token
+    });
 
-  if (!token) {
-    return loader();
-  }
+    if (!token) {
+        return loader();
+    }
 
-  const key = createCacheKey(
-      token,
-      "student",
-      String(id)
-  );
+    const key = createCacheKey(
+        token,
+        "student",
+        String(id)
+    );
 
-  return getCached(key, loader);
+    return getCached(key, loader);
 }
 
 
 export async function createStudent(fetch, token, payload) {
 
-  const result = await apiRequest(fetch, {
-    method: "POST",
-    path: "/students",
-    body: payload,
-    token
-  });
+    const result = await apiRequest(fetch, {
+        method: "POST",
+        path: "/students",
+        body: payload,
+        token
+    });
 
-  clearCache();
+    clearCache();
 
-  return result;
+    return result;
 }
 
 
 export async function updateStudent(fetch, token, id, payload) {
 
-  const result = await apiRequest(fetch, {
-    method: "PUT",
-    path: `/students/${id}`,
-    body: payload,
-    token
-  });
+    const result = await apiRequest(fetch, {
+        method: "PUT",
+        path: `/students/${id}`,
+        body: payload,
+        token
+    });
 
-  clearCache();
+    clearCache();
 
-  return result;
+    return result;
 }
 
 
 export async function deleteStudent(fetch, token, id) {
 
-  const result = await apiRequest(fetch, {
-    method: "DELETE",
-    path: `/students/${id}`,
-    token
-  });
+    const result = await apiRequest(fetch, {
+        method: "DELETE",
+        path: `/students/${id}`,
+        token
+    });
 
-  clearCache();
+    clearCache();
 
-  return result;
+    return result;
 }

@@ -1,40 +1,40 @@
-<script>
-  import { page } from "$app/state";
+    <script>
+        import {page} from "$app/state";
 
-  let { user } = $props();
+        let {user} = $props();
 
-  let isAdmin = $derived(user?.role === "ADMIN");
-</script>
+        let isAdmin = $derived(user?.role === "ADMIN");
+    </script>
 
 <header class="header">
-  <a class="brand" href="/students">Студенты</a>
+    <a class="brand" href="/students">Студенты</a>
 
-  <nav class="nav">
-    {#if user}
-      <a
-        href="/students"
-        aria-current={page.url.pathname.startsWith("/students") ? "page" : undefined}
-      >Список</a>
+    <nav class="nav">
+      {#if user}
+        <a
+                href="/students"
+                aria-current={ page.url.pathname.startsWith("/students") ? "page" : undefined }
+        >Список</a>
       {#if isAdmin}
         <a
-          href="/students/new"
-          aria-current={page.url.pathname === "/students/new" ? "page" : undefined}
+                href="/students/new"
+                aria-current={ page.url.pathname === "/students/new" ? "page" : undefined }
         >Добавить</a>
       {/if}
-      <a
-        href="/profile"
-        aria-current={page.url.pathname === "/profile" ? "page" : undefined}
-      >Профиль</a>
-    {:else}
-      <a href="/login">Вход</a>
-      <a href="/register">Регистрация</a>
-    {/if}
-  </nav>
+        <a
+                href="/profile"
+                aria-current={ page.url.pathname === "/profile" ? "page" : undefined }
+        >Профиль</a>
+      {:else}
+        <a href="/login">Вход</a>
+        <a href="/register">Регистрация</a>
+      {/if}
+    </nav>
 
   {#if user}
     <form method="POST" action="/profile?/logout" class="logout">
-      <span class="user">{user.username}{#if isAdmin} · ADMIN{/if}</span>
-      <button type="submit">Выйти</button>
+        <span class="user">{ user.username }{#if isAdmin} · ADMIN{/if}</span>
+        <button type="submit">Выйти</button>
     </form>
   {/if}
 </header>

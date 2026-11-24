@@ -1,47 +1,47 @@
-import { fail, redirect } from "@sveltejs/kit";
-import { login } from "$lib/server/auth.js";
+import {fail, redirect} from "@sveltejs/kit";
+import {login} from "$lib/server/auth.js";
 
 
 export const actions = {
-  default: async ({ request, cookies, fetch, url }) => {
+    default: async ({request, cookies, fetch, url}) => {
 
-    const form = await request.formData();
+        const form = await request.formData();
 
-    const usernameOrEmail =
-        form.get("usernameOrEmail")?.toString().trim() ?? "";
+        const usernameOrEmail =
+            form.get("usernameOrEmail")?.toString().trim() ?? "";
 
-    const password =
-        form.get("password")?.toString() ?? "";
+        const password =
+            form.get("password")?.toString() ?? "";
 
-    if (!usernameOrEmail || !password) {
-      return fail(400, {
-        usernameOrEmail,
-        error: "Заполните все поля"
-      });
+        if (!usernameOrEmail || !password) {
+            return fail(400, {
+                usernameOrEmail,
+                error: "Заполните все поля"
+            });
+        }
+
+        try {
+            await login(fetch, cookies, {
+                usernameOrEmail,
+                password
+            });
+        } catch (error) {
+            return fail(error.status || 500, {
+                usernameOrEmail,
+                error: error.userMessage ?? "Ошибка входа"
+            });
+        }
+
+        const redirectTo = url.searchParams.get("redirect");
+
+        const destination =
+            redirectTo &&
+            redirectTo.startsWith("/") &&
+            !redirectTo.startsWith("//") &&
+            !redirectTo.includes("\\")
+                ? redirectTo
+                : "/students";
+
+        throw redirect(303, destination);
     }
-
-    try {
-      await login(fetch, cookies, {
-        usernameOrEmail,
-        password
-      });
-    } catch (error) {
-      return fail(error.status || 500, {
-        usernameOrEmail,
-        error: error.userMessage ?? "Ошибка входа"
-      });
-    }
-
-    const redirectTo = url.searchParams.get("redirect");
-
-    const destination =
-        redirectTo &&
-        redirectTo.startsWith("/") &&
-        !redirectTo.startsWith("//") &&
-        !redirectTo.includes("\\")
-            ? redirectTo
-            : "/students";
-
-    throw redirect(303, destination);
-  }
 };

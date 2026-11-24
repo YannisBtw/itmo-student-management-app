@@ -1,5 +1,5 @@
     <script>
-        import { onMount } from "svelte";
+        import {onMount} from "svelte";
 
         import {
             Subject,
@@ -8,15 +8,15 @@
             filter
         } from "rxjs";
 
-        import { goto } from "$app/navigation";
-        import { page } from "$app/state";
+        import {goto} from "$app/navigation";
+        import {page} from "$app/state";
 
         import StudentTable from "$lib/components/students/StudentTable.svelte";
         import StudentFilters from "$lib/components/students/StudentFilters.svelte";
         import Pagination from "$lib/components/students/Pagination.svelte";
 
 
-        let { data } = $props();
+        let {data} = $props();
 
         const filters$ = new Subject();
 
@@ -111,7 +111,6 @@
 
         onMount(() => {
             const subscription = filters$.pipe(
-
                     debounceTime(300),
 
                     distinctUntilChanged((previous, current) =>
@@ -120,7 +119,6 @@
                     ),
 
                     filter(areFiltersValid)
-
             ).subscribe((nextFilters) => {
 
                 navigateToQuery({
@@ -148,22 +146,14 @@
             Добавить студента
         </a>
       {/if}
-    </div>
-
-    <StudentFilters
-        {query}
-        onfilterschange={handleFiltersChange}
-    />
-
-    <StudentTable {students} />
-
-    <Pagination
-        page={currentPage}
-{pageSize}
-{hasNext}
-        onprev={handlePrev}
-        onnext={handleNext}
-        onpagesizechange={handlePageSizeChange}
+    </div>{ query }
+        onfilterschange={ handleFiltersChange }
+    />{ students } />{ currentPage }
+{ pageSize }
+{ hasNext }
+        onprev={ handlePrev }
+        onnext={ handleNext }
+        onpagesizechange={ handlePageSizeChange }
     />
 </section>
 
