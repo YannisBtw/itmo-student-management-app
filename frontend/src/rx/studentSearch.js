@@ -12,8 +12,7 @@ import {
 import { queryStudents } from "../services/studentService.js";
 
 
-function queryStudentsObservable(query) {
-    return new Observable((subscriber) => {
+export function queryStudentsObservable(query) {    return new Observable((subscriber) => {
         const controller = new AbortController();
 
         queryStudents(query, {
@@ -41,16 +40,31 @@ function queryStudentsObservable(query) {
 }
 
 
+function queriesAreEqual(previous, current) {
+    return (
+        previous.fullName === current.fullName &&
+        previous.isuId === current.isuId &&
+        previous.group === current.group &&
+        previous.dormitoryNumber === current.dormitoryNumber &&
+        previous.roomNumber === current.roomNumber &&
+        previous.moveInDate === current.moveInDate &&
+        previous.isForeign === current.isForeign &&
+        previous.notes === current.notes &&
+        previous.sortBy === current.sortBy &&
+        previous.sortDirection === current.sortDirection &&
+        previous.page === current.page &&
+        previous.size === current.size
+    );
+}
+
+
 export function createStudentSearch() {
     const searchSubject = new Subject();
 
     const results$ = searchSubject.pipe(
         debounceTime(300),
 
-        distinctUntilChanged(
-            (previous, current) =>
-                previous.fullName === current.fullName
-        ),
+        distinctUntilChanged(queriesAreEqual),
 
         switchMap((query) =>
             queryStudentsObservable(query).pipe(

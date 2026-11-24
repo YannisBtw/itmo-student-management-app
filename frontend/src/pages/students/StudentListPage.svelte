@@ -21,6 +21,10 @@
         createStudentSearch
     } from "../../rx/studentSearch.js";
 
+    import {
+        createStudentLiveUpdates
+    } from "../../rx/studentLiveUpdates.js";
+
 
     let students = $state([]);
     let loading = $state(true);
@@ -34,7 +38,9 @@
         sortDirection: "asc"
     });
 
+
     const studentSearch = createStudentSearch();
+
 
     let hasNext = $derived(
         students.length === pageSize
@@ -64,23 +70,18 @@
     }
 
 
-    function handleApplyFilters(nextFilters) {
+    function handleFiltersChange(nextFilters) {
         filters = nextFilters;
         page = 0;
 
-        loadStudents();
-    }
+        loading = true;
+        error = null;
 
-
-    function handleResetFilters() {
-        filters = {
-            sortBy: "id",
-            sortDirection: "asc"
-        };
-
-        page = 0;
-
-        loadStudents();
+        studentSearch.search({
+            ...filters,
+            page,
+            size: pageSize
+        });
     }
 
 
@@ -114,27 +115,8 @@
     }
 
 
-    function handleSearch(fullName) {
-        filters = {
-            ...filters,
-            fullName: fullName.trim()
-        };
-
-        page = 0;
-
-        loading = true;
-        error = null;
-
-        studentSearch.search({
-            ...filters,
-            page,
-            size: pageSize
-        });
-    }
-
-
     onMount(() => {
-        const subscription =
+        const searchSubscription =
             studentSearch.results$.subscribe((result) => {
                 if (result.error) {
                     error = result.error;
@@ -146,10 +128,32 @@
                 loading = false;
             });
 
+
+        const liveSubscription =
+            createStudentLiveUpdates(() => ({
+                ...filters,
+                page,
+                size: pageSize
+            })).subscribe((result) => {
+                if (result.error) {
+                    console.error(
+                        "LIVE STUDENTS UPDATE ERROR:",
+                        result.error
+                    );
+
+                    return;
+                }
+
+                students = result.students;
+            });
+
+
         loadStudents();
 
+
         return () => {
-            subscription.unsubscribe();
+            searchSubscription.unsubscribe();
+            liveSubscription.unsubscribe();
             studentSearch.complete();
         };
     });
@@ -160,14 +164,14 @@
 
 
 <StudentFilters
-        onapply={handleApplyFilters}
-        onreset={handleResetFilters}
-        onsearch={handleSearch}
+        onfilterschange={handleFiltersChange}
 />
 
 
 {#if loading}
-    <Loading message="Загружаем студентов..." />
+    <Loading
+            message="Загружаем студентов..."
+    />
 
 {:else if error}
     <ErrorMessage
@@ -176,7 +180,9 @@
     />
 
 {:else}
-    <StudentTable {students} />
+    <StudentTable
+            {students}
+    />
 
     <Pagination
             {page}

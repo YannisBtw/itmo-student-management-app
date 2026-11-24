@@ -66,7 +66,6 @@ export function getErrorMessage(error) {
 
 
 let handlers = {
-    getAccessToken: () => null,
     refresh: null,
     onAuthFailure: () => {}
 };
@@ -98,34 +97,44 @@ function buildUrl(path, query) {
 }
 
 
-async function send(url, { method, body, headers, signal, auth }) {
-    const finalHeaders = { Accept: "application/json", ...headers };
+async function send(
+    url,
+    {
+        method,
+        body,
+        headers,
+        signal,
+        auth
+    }
+) {
+    const finalHeaders = {
+        Accept: "application/json",
+        ...headers
+    };
 
     if (body !== undefined) {
         finalHeaders["Content-Type"] = "application/json";
-    }
-
-    if (auth) {
-        const token = handlers.getAccessToken();
-
-        if (token) {
-            finalHeaders["Authorization"] = "Bearer " + token;
-        }
     }
 
     try {
         return await fetch(url, {
             method,
             headers: finalHeaders,
-            body: body === undefined ? undefined : JSON.stringify(body),
-            signal
+            body: body === undefined
+                ? undefined
+                : JSON.stringify(body),
+            signal,
+            credentials: "include"
         });
     } catch (error) {
         if (error?.name === "AbortError") {
             throw error;
         }
 
-        throw new ApiError(0, "Network error");
+        throw new ApiError(
+            0,
+            "Network error"
+        );
     }
 }
 
@@ -203,5 +212,13 @@ export const api = {
     put: (path, body, options) => request(path, { ...options, method: "PUT", body }),
     patch: (path, body, options) => request(path, { ...options, method: "PATCH", body }),
     delete: (path, options) => request(path, { ...options, method: "DELETE" }),
-    query: (path, query, options) => request(path, { ...options, method: "QUERY", query })
+    query: (path, body, options) =>
+        request(
+            path,
+            {
+                ...options,
+                method: "QUERY",
+                body
+            }
+        )
 };

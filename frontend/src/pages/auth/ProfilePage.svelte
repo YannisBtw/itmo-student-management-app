@@ -22,16 +22,31 @@
             <dt>Логин</dt>
             <dd>{$currentUser.username}</dd>
 
+            <dt>Email</dt>
+            <dd>{$currentUser.email}</dd>
+
             <dt>Роль</dt>
-            <dd>{roleLabels[$currentUser.role] ?? $currentUser.role}</dd>
+            <dd>
+                {roleLabels[$currentUser.role] ?? $currentUser.role}
+            </dd>
 
             <dt>Доступные действия</dt>
-            <dd>{rights[$currentUser.role] ?? "Нет данных"}</dd>
+            <dd>
+                {rights[$currentUser.role] ?? "Нет данных"}
+            </dd>
         </dl>
 
         <div class="actions">
-            <a href="/" use:link>К списку студентов</a>
-            <button type="button" onclick={logout}>Выйти</button>
+            <a href="/" use:link>
+                К списку студентов
+            </a>
+
+            <button
+                    type="button"
+                    onclick={logout}
+            >
+                Выйти
+            </button>
         </div>
     {/if}
 </AuthCard>

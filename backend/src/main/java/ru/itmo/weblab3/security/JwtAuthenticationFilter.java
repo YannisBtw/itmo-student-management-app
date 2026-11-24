@@ -9,14 +9,14 @@ import jakarta.ws.rs.container.ContainerRequestContext;
 import jakarta.ws.rs.container.ContainerRequestFilter;
 import jakarta.ws.rs.container.ResourceInfo;
 import jakarta.ws.rs.core.Context;
-import jakarta.ws.rs.core.HttpHeaders;
+import jakarta.ws.rs.core.Cookie;
 import jakarta.ws.rs.ext.Provider;
 
 @Provider
 @Priority(Priorities.AUTHENTICATION)
 public class JwtAuthenticationFilter implements ContainerRequestFilter {
 
-    private static final String BEARER_PREFIX = "Bearer ";
+    private static final String ACCESS_COOKIE = "access_token";
 
     @Inject
     JwtService jwtService;
@@ -36,12 +36,21 @@ public class JwtAuthenticationFilter implements ContainerRequestFilter {
             return;
         }
 
-        String header = ctx.getHeaderString(HttpHeaders.AUTHORIZATION);
-        if (header == null || !header.startsWith(BEARER_PREFIX)) {
-            throw new AuthenticationException("Missing or malformed Authorization header");
+        Cookie accessCookie =
+                ctx.getCookies().get(ACCESS_COOKIE);
+
+        if (
+                accessCookie == null ||
+                        accessCookie.getValue() == null ||
+                        accessCookie.getValue().isBlank()
+        ) {
+            throw new AuthenticationException(
+                    "Authentication required"
+            );
         }
 
-        String token = header.substring(BEARER_PREFIX.length()).trim();
+        String token = accessCookie.getValue();
+
         
         // Валидация токена и извлечение данных
         JwtPayload payload = jwtService.parseAccess(token);
@@ -74,6 +83,11 @@ public class JwtAuthenticationFilter implements ContainerRequestFilter {
         if (path.startsWith("/")) {
             path = path.substring(1);
         }
-        return path.startsWith("auth/") || path.equals("openapi.json") || path.equals("openapi.yaml");
+        return path.equals("auth/register")
+                || path.equals("auth/login")
+                || path.equals("auth/refresh")
+                || path.equals("auth/logout")
+                || path.equals("openapi.json")
+                || path.equals("openapi.yaml");
     }
 }

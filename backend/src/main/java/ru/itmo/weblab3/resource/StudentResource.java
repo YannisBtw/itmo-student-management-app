@@ -12,6 +12,7 @@ import ru.itmo.weblab3.dto.StudentCreateDto;
 import ru.itmo.weblab3.dto.StudentResponseDto;
 import ru.itmo.weblab3.dto.StudentUpdateDto;
 import ru.itmo.weblab3.dto.StudentPatchDto;
+import ru.itmo.weblab3.dto.StudentQueryDto;
 import ru.itmo.weblab3.service.StudentService;
 import ru.itmo.weblab3.util.Logs;
 import ru.itmo.weblab3.http.Query;
@@ -76,32 +77,25 @@ public class StudentResource {
 
     @Query
     public Response queryStudents(
-            @QueryParam("fullName") String fullName,
-            @QueryParam("isuId") Integer isuId,
-            @QueryParam("group") String group,
-            @QueryParam("dormitoryNumber") Integer dormitoryNumber,
-            @QueryParam("roomNumber") Integer roomNumber,
-            @QueryParam("moveInDate") String moveInDate,
-            @QueryParam("isForeign") String isForeign,
-            @QueryParam("notes") String notes,
-            @QueryParam("sortBy") String sortBy,
-            @QueryParam("sortDirection") String sortDirection,
-            @QueryParam("page") Integer page,
-            @QueryParam("size") Integer size
+            StudentQueryDto query
     ) {
+        if (query == null) {
+            query = new StudentQueryDto();
+        }
+
         return findStudents(
-                fullName,
-                isuId,
-                group,
-                dormitoryNumber,
-                roomNumber,
-                moveInDate,
-                isForeign,
-                notes,
-                sortBy,
-                sortDirection,
-                page,
-                size
+                query.getFullName(),
+                query.getIsuId(),
+                query.getGroup(),
+                query.getDormitoryNumber(),
+                query.getRoomNumber(),
+                query.getMoveInDate(),
+                query.getIsForeign(),
+                query.getNotes(),
+                query.getSortBy(),
+                query.getSortDirection(),
+                query.getPage(),
+                query.getSize()
         );
     }
 
@@ -113,16 +107,15 @@ public class StudentResource {
             Integer dormitoryNumber,
             Integer roomNumber,
             String moveInDate,
-            String isForeign,
+            Boolean isForeign,
             String notes,
             String sortBy,
             String sortDirection,
             Integer page,
             Integer size
     ) {
-        LocalDate parsedMoveInDate = parseMoveInDate(moveInDate);
-        Boolean parsedIsForeign = parseIsForeign(isForeign);
-
+        LocalDate parsedMoveInDate =
+                parseMoveInDate(moveInDate);
         List<StudentResponseDto> students =
                 studentService.findFiltered(
                         fullName,
@@ -131,7 +124,7 @@ public class StudentResource {
                         dormitoryNumber,
                         roomNumber,
                         parsedMoveInDate,
-                        parsedIsForeign,
+                        isForeign,
                         notes,
                         sortBy,
                         sortDirection,
@@ -233,23 +226,5 @@ public class StudentResource {
                     "moveInDate должно быть формата DD-MM-YYYY"
             );
         }
-    }
-
-    private Boolean parseIsForeign(String value) {
-        if (value == null || value.isBlank()) {
-            return null;
-        }
-
-        if (value.equalsIgnoreCase("true")) {
-            return true;
-        }
-
-        if (value.equalsIgnoreCase("false")) {
-            return false;
-        }
-
-        throw new BadRequestException(
-                "isForeign должно быть true или false"
-        );
     }
 }

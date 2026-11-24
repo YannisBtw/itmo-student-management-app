@@ -113,4 +113,27 @@ public class AuthService {
 
         return new TokenResponseDto(access, refresh, jwtService.getAccessTtlSeconds());
     }
+
+    public long getRefreshTtlSeconds() {
+        return jwtService.getRefreshTtlSeconds();
+    }
+
+    @Transactional
+    public void logout(String refreshTokenRaw) {
+        if (
+                refreshTokenRaw == null ||
+                        refreshTokenRaw.isBlank()
+        ) {
+            return;
+        }
+
+        String hash =
+                jwtService.hashToken(refreshTokenRaw);
+
+        refreshTokenRepository
+                .findByHash(hash)
+                .ifPresent(
+                        refreshTokenRepository::markRevoked
+                );
+    }
 }

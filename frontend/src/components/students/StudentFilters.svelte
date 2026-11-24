@@ -1,9 +1,8 @@
 <script>
     let {
-        onapply,
-        onreset,
-        onsearch
+        onfilterschange
     } = $props();
+
 
     let fullName = $state("");
     let isuId = $state("");
@@ -29,22 +28,34 @@
     }
 
 
-    function handleSubmit(event) {
-        event.preventDefault();
-
-        onapply?.({
+    function notifyFiltersChange() {
+        onfilterschange?.({
             fullName: fullName.trim(),
-            isuId: isuId ? Number(isuId) : undefined,
+
+            isuId: isuId
+                ? Number(isuId)
+                : undefined,
+
             group: group.trim(),
+
             dormitoryNumber: dormitoryNumber
                 ? Number(dormitoryNumber)
                 : undefined,
+
             roomNumber: roomNumber
                 ? Number(roomNumber)
                 : undefined,
-            moveInDate: formatDateForBackend(moveInDate),
-            isForeign: isForeign || undefined,
+
+            moveInDate:
+                formatDateForBackend(moveInDate),
+
+            isForeign:
+                isForeign === ""
+                    ? undefined
+                    : isForeign === "true",
+
             notes: notes.trim(),
+
             sortBy,
             sortDirection
         });
@@ -64,114 +75,195 @@
         sortBy = "id";
         sortDirection = "asc";
 
-        onreset?.();
+        notifyFiltersChange();
     }
 </script>
 
 
-<form onsubmit={handleSubmit}>
+<div class="filter-form">
     <div class="filters">
         <label>
             ФИО
 
             <input
                     type="text"
-                    bind:value={fullName}
+                    value={fullName}
                     placeholder="Иванов"
-                    oninput={(event) =>
-            onsearch?.(event.currentTarget.value)
-        }
+                    oninput={(event) => {
+                        fullName = event.currentTarget.value;
+                        notifyFiltersChange();
+                    }}
             />
         </label>
+
 
         <label>
             ИСУ
+
             <input
                     type="number"
-                    bind:value={isuId}
+                    value={isuId}
                     placeholder="123456"
+                    oninput={(event) => {
+                        isuId = event.currentTarget.value;
+                        notifyFiltersChange();
+                    }}
             />
         </label>
+
 
         <label>
             Группа
+
             <input
                     type="text"
-                    bind:value={group}
+                    value={group}
                     placeholder="P3120"
+                    oninput={(event) => {
+                        group = event.currentTarget.value;
+                        notifyFiltersChange();
+                    }}
             />
         </label>
+
 
         <label>
             Общежитие
+
             <input
                     type="number"
-                    bind:value={dormitoryNumber}
+                    value={dormitoryNumber}
+                    oninput={(event) => {
+                        dormitoryNumber =
+                            event.currentTarget.value;
+
+                        notifyFiltersChange();
+                    }}
             />
         </label>
+
 
         <label>
             Комната
+
             <input
                     type="number"
-                    bind:value={roomNumber}
+                    value={roomNumber}
+                    oninput={(event) => {
+                        roomNumber =
+                            event.currentTarget.value;
+
+                        notifyFiltersChange();
+                    }}
             />
         </label>
+
 
         <label>
             Дата заселения
+
             <input
                     type="date"
-                    bind:value={moveInDate}
+                    value={moveInDate}
+                    onchange={(event) => {
+                        moveInDate =
+                            event.currentTarget.value;
+
+                        notifyFiltersChange();
+                    }}
             />
         </label>
 
+
         <label>
             Иностранец
-            <select bind:value={isForeign}>
+
+            <select
+                    value={isForeign}
+                    onchange={(event) => {
+                        isForeign =
+                            event.currentTarget.value;
+
+                        notifyFiltersChange();
+                    }}
+            >
                 <option value="">Все</option>
                 <option value="true">Да</option>
                 <option value="false">Нет</option>
             </select>
         </label>
 
+
         <label>
             Заметки
+
             <input
                     type="text"
-                    bind:value={notes}
+                    value={notes}
+                    oninput={(event) => {
+                        notes = event.currentTarget.value;
+                        notifyFiltersChange();
+                    }}
             />
         </label>
 
+
         <label>
             Сортировать по
-            <select bind:value={sortBy}>
+
+            <select
+                    value={sortBy}
+                    onchange={(event) => {
+                        sortBy =
+                            event.currentTarget.value;
+
+                        notifyFiltersChange();
+                    }}
+            >
                 <option value="id">ID</option>
                 <option value="fullName">ФИО</option>
                 <option value="isuId">ИСУ</option>
                 <option value="group">Группе</option>
-                <option value="dormitoryNumber">Общежитию</option>
+                <option value="dormitoryNumber">
+                    Общежитию
+                </option>
                 <option value="roomNumber">Комнате</option>
-                <option value="moveInDate">Дате заселения</option>
-                <option value="isForeign">Иностранцу</option>
+                <option value="moveInDate">
+                    Дате заселения
+                </option>
+                <option value="isForeign">
+                    Иностранцу
+                </option>
                 <option value="notes">Заметкам</option>
             </select>
         </label>
 
+
         <label>
             Направление
-            <select bind:value={sortDirection}>
-                <option value="asc">По возрастанию</option>
-                <option value="desc">По убыванию</option>
+
+            <select
+                    value={sortDirection}
+                    onchange={(event) => {
+                        sortDirection =
+                            event.currentTarget.value;
+
+                        notifyFiltersChange();
+                    }}
+            >
+                <option value="asc">
+                    По возрастанию
+                </option>
+
+                <option value="desc">
+                    По убыванию
+                </option>
             </select>
         </label>
     </div>
 
-    <div class="actions">
-        <button type="submit">
-            Применить
-        </button>
 
+    <div class="actions">
         <button
                 type="button"
                 onclick={handleReset}
@@ -179,11 +271,11 @@
             Сбросить
         </button>
     </div>
-</form>
+</div>
 
 
 <style>
-    form {
+    .filter-form {
         margin-bottom: 1.5rem;
         padding: 1rem;
         border: 1px solid #cccccc;
@@ -192,7 +284,8 @@
 
     .filters {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+        grid-template-columns:
+            repeat(auto-fit, minmax(160px, 1fr));
         gap: 1rem;
     }
 

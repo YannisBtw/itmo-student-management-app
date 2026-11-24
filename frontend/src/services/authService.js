@@ -1,113 +1,158 @@
 import { get } from "svelte/store";
-import { defer, firstValueFrom, from } from "rxjs";
+import {
+    defer,
+    firstValueFrom,
+    from
+} from "rxjs";
 import { share } from "rxjs/operators";
 
-import { startSessionWatcher } from "../rx/authSession.js";
-import { authStore, currentUser, isAuthenticated } from "../stores/authStore.js";
-import { api, ApiError, configureApi } from "./api.js";
+import {
+    authStore,
+    currentUser,
+    isAuthenticated
+} from "../stores/authStore.js";
+
+import {
+    api,
+    ApiError,
+    configureApi
+} from "./api.js";
 
 
 async function performRefresh() {
-    const { refreshToken } = get(authStore);
-
-    if (!refreshToken) {
-        throw new ApiError(401, "Нет refresh-токена");
-    }
-
-    try {
-        const tokens = await api.post(
-            "/auth/refresh",
-            { refreshToken },
-            { auth: false }
-        );
-
-        authStore.setTokens(tokens);
-
-    } catch (error) {
-        authStore.syncFromStorage();
-
-        const current = get(authStore).refreshToken;
-
-        if (current && current !== refreshToken) {
-            return;
+    await api.post(
+        "/auth/refresh",
+        undefined,
+        {
+            auth: false
         }
-
-        throw error;
-    }
+    );
 }
 
 
-export const refresh$ = defer(() => from(performRefresh())).pipe(share());
+export const refresh$ = defer(
+    () => from(performRefresh())
+).pipe(
+    share()
+);
 
 
 export function refreshTokens() {
-    return firstValueFrom(refresh$, { defaultValue: undefined });
+    return firstValueFrom(
+        refresh$,
+        {
+            defaultValue: undefined
+        }
+    );
 }
 
 
-export async function login(usernameOrEmail, password) {
-    const tokens = await api.post(
-        "/auth/login",
-        { usernameOrEmail, password },
-        { auth: false }
+export async function loadCurrentUser() {
+    const user = await api.get(
+        "/auth/me"
     );
 
-    authStore.setTokens(tokens);
+    authStore.setUser(user);
 
-    return get(currentUser);
+    return user;
 }
 
 
-export function register({ username, email, password }) {
+export async function login(
+    usernameOrEmail,
+    password
+) {
+    await api.post(
+        "/auth/login",
+        {
+            usernameOrEmail,
+            password
+        },
+        {
+            auth: false
+        }
+    );
+
+    return loadCurrentUser();
+}
+
+
+export function register({
+                             username,
+                             email,
+                             password
+                         }) {
     return api.post(
         "/auth/register",
-        { username, email, password },
-        { auth: false }
+        {
+            username,
+            email,
+            password
+        },
+        {
+            auth: false
+        }
     );
 }
 
 
 export async function logout() {
-    authStore.clear();
+    try {
+        await api.post(
+            "/auth/logout",
+            undefined,
+            {
+                auth: false
+            }
+        );
+    } finally {
+        authStore.clear();
+    }
 }
 
 
-function expireSession(onSessionExpired) {
-    if (!get(isAuthenticated)) {
-        return;
-    }
+function expireSession(
+    onSessionExpired
+) {
+    const wasAuthenticated =
+        get(isAuthenticated);
 
     authStore.clear();
 
-    if (onSessionExpired) {
+    if (
+        wasAuthenticated &&
+        onSessionExpired
+    ) {
         onSessionExpired();
     }
 }
 
 
-let stopWatcher = null;
-
-export function initAuth({ onSessionExpired } = {}) {
+export async function initAuth({
+                                   onSessionExpired
+                               } = {}) {
     configureApi({
-        getAccessToken: () => get(authStore).accessToken,
         refresh: refreshTokens,
-        onAuthFailure: () => expireSession(onSessionExpired)
+
+        onAuthFailure: () =>
+            expireSession(
+                onSessionExpired
+            )
     });
 
-    if (stopWatcher) {
-        stopWatcher();
+    try {
+        await loadCurrentUser();
+    } catch (error) {
+        authStore.clear();
+
+        if (
+            !(error instanceof ApiError) ||
+            error.status !== 401
+        ) {
+            console.error(
+                "AUTH INITIALIZATION ERROR:",
+                error
+            );
+        }
     }
-
-    const subscription = startSessionWatcher({
-        authStore,
-        refresh$,
-        onSessionExpired: () => expireSession(onSessionExpired)
-    });
-
-    stopWatcher = function () {
-        subscription.unsubscribe();
-        stopWatcher = null;
-    };
-
-    return stopWatcher;
 }

@@ -7,6 +7,7 @@ import ru.itmo.weblab3.entity.User;
 import ru.itmo.weblab3.exception.ConflictException;
 import ru.itmo.weblab3.repository.UserRepository;
 import ru.itmo.weblab3.util.Logs;
+import ru.itmo.weblab3.exception.AuthenticationException;
 
 
 import jakarta.enterprise.context.ApplicationScoped;
@@ -53,6 +54,18 @@ public class UserService {
                 "User registered: username="
                         + Logs.clean(username)
         );
+
+        return toDto(user);
+    }
+
+    public UserResponseDto getByUsername(String username) {
+        User user = userRepository
+                .findByUsername(username)
+                .orElseThrow(() ->
+                        new AuthenticationException(
+                                "Authentication required"
+                        )
+                );
 
         return toDto(user);
     }
