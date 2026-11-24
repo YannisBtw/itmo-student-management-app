@@ -1,5 +1,14 @@
 node_modules
-dist
+.svelte-kit
+build
+
 .git
 .idea
+.vscode
+
+.env
+.env.*
+
 *.log
+.DS_Store
+Thumbs.db

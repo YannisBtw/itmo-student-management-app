@@ -3,52 +3,31 @@
 
         import {
             Subject,
-            debounce,
+            debounceTime,
             distinctUntilChanged,
-            filter,
-            timer,
-            of
+            filter
         } from "rxjs";
 
-        import {
-            goto,
-            beforeNavigate,
-            afterNavigate
-        } from "$app/navigation";
-
+        import { goto } from "$app/navigation";
         import { page } from "$app/state";
 
-        import StudentTable from
-                    "$lib/components/students/StudentTable.svelte";
-
-        import StudentFilters from
-                    "$lib/components/students/StudentFilters.svelte";
-
-        import Pagination from
-                    "$lib/components/students/Pagination.svelte";
+        import StudentTable from "$lib/components/students/StudentTable.svelte";
+        import StudentFilters from "$lib/components/students/StudentFilters.svelte";
+        import Pagination from "$lib/components/students/Pagination.svelte";
 
 
         let { data } = $props();
 
         const filters$ = new Subject();
 
-        let filterVersion = $state(0);
-
         let students = $derived(data.students);
-
         let query = $derived(data.query);
 
         let currentPage = $derived(query.page);
-
         let pageSize = $derived(query.size);
 
-        let hasNext = $derived(
-                students.length === pageSize
-        );
-
-        let isAdmin = $derived(
-                data.user?.role === "ADMIN"
-        );
+        let hasNext = $derived(students.length === pageSize);
+        let isAdmin = $derived(data.user?.role === "ADMIN");
 
 
         function navigateToQuery(nextQuery) {
@@ -123,17 +102,9 @@
 
         function areFiltersValid(filters) {
             return (
-                    isOptionalInteger(
-                            filters.isuId, 100000, 999999
-                    ) &&
-
-                    isOptionalInteger(
-                            filters.dormitoryNumber, 1, 99
-                    ) &&
-
-                    isOptionalInteger(
-                            filters.roomNumber, 1, 9999
-                    )
+                    isOptionalInteger(filters.isuId, 100000, 999999) &&
+                    isOptionalInteger(filters.dormitoryNumber, 1, 99) &&
+                    isOptionalInteger(filters.roomNumber, 1, 9999)
             );
         }
 
@@ -141,23 +112,14 @@
         onMount(() => {
             const subscription = filters$.pipe(
 
-                    debounce((filters) =>
-                            filters === null
-                                    ? of(0)
-                                    : timer(300)
-                    ),
+                    debounceTime(300),
 
                     distinctUntilChanged((previous, current) =>
-                            previous !== null &&
-                            current !== null &&
                             JSON.stringify(previous) ===
                             JSON.stringify(current)
                     ),
 
-                    filter((filters) =>
-                            filters !== null &&
-                            areFiltersValid(filters)
-                    )
+                    filter(areFiltersValid)
 
             ).subscribe((nextFilters) => {
 
