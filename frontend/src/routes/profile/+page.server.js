@@ -14,9 +14,9 @@ export function load({locals}) {
 
 
 export const actions = {
-    logout: async ({fetch, cookies, locals}) => {
+    logout: async ({cookies, locals}) => {
         try {
-            await logout(fetch, cookies);
+            await logout(cookies);
         } catch (e) {
             return fail(e.status || 500, {
                 error: e.userMessage ?? "Не удалось выйти из аккаунта"

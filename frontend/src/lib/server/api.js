@@ -1,4 +1,5 @@
 import {env} from "$env/dynamic/private";
+import {getRequestEvent} from "$app/server";
 
 const BASE_URL = (env.API_BASE_URL ?? "http://localhost:8080/api").replace(
     /\/+$/,
@@ -85,19 +86,18 @@ async function parseBody(response) {
     }
 }
 
-export async function apiRequest(
-    fetch,
-    {
-        method = "GET",
-        path,
-        query,
-        body,
-        token,
-        auth = true,
-        cookieHeader,
-        raw = false
-    }
-) {
+export async function apiRequest({
+                                     method = "GET",
+                                     path,
+                                     query,
+                                     body,
+                                     token,
+                                     auth = true,
+                                     cookieHeader,
+                                     raw = false
+                                 }) {
+    const {fetch} = getRequestEvent();
+
     const url = buildUrl(path, query);
 
     const headers = {

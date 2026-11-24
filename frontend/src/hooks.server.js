@@ -15,10 +15,10 @@ function isAdminOnlyPath(path) {
 }
 
 
-async function resolveUser(fetch, cookies) {
+async function resolveUser(cookies) {
     try {
         if (readToken(cookies)) {
-            return await loadCurrentUser(fetch, cookies);
+            return await loadCurrentUser(cookies);
         }
     } catch (error) {
         if (error.status !== 401) {
@@ -28,10 +28,10 @@ async function resolveUser(fetch, cookies) {
 
     if (readRefresh(cookies)) {
         try {
-            const refreshed = await refreshTokens(fetch, cookies);
+            const refreshed = await refreshTokens(cookies);
 
             if (refreshed) {
-                return await loadCurrentUser(fetch, cookies);
+                return await loadCurrentUser(cookies);
             }
         } catch (error) {
             if (error.status !== 401) {
@@ -47,9 +47,9 @@ async function resolveUser(fetch, cookies) {
 
 
 export async function handle({event, resolve}) {
-    const {cookies, url, fetch} = event;
+    const {cookies, url} = event;
 
-    const user = await resolveUser(fetch, cookies);
+    const user = await resolveUser(cookies);
 
     event.locals.user = user;
     event.locals.token = readToken(cookies);

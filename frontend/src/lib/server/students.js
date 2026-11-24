@@ -1,12 +1,10 @@
 import {createHash} from "node:crypto";
 
 import {apiRequest} from "./api.js";
-
 import {getCached, clearCache} from "./cache.js";
 
 
 function createCacheKey(token, type, params) {
-
     const tokenHash = createHash("sha256")
         .update(token)
         .digest("hex");
@@ -19,9 +17,8 @@ function createCacheKey(token, type, params) {
 }
 
 
-export function listStudents(fetch, token, query) {
-
-    const loader = () => apiRequest(fetch, {
+export function listStudents(token, query) {
+    const loader = () => apiRequest({
         method: "QUERY",
         path: "/students",
         body: query,
@@ -32,19 +29,14 @@ export function listStudents(fetch, token, query) {
         return loader();
     }
 
-    const key = createCacheKey(
-        token,
-        "students",
-        query
-    );
+    const key = createCacheKey(token, "students", query);
 
     return getCached(key, loader);
 }
 
 
-export function getStudent(fetch, token, id) {
-
-    const loader = () => apiRequest(fetch, {
+export function getStudent(token, id) {
+    const loader = () => apiRequest({
         method: "GET",
         path: `/students/${id}`,
         token
@@ -54,19 +46,14 @@ export function getStudent(fetch, token, id) {
         return loader();
     }
 
-    const key = createCacheKey(
-        token,
-        "student",
-        String(id)
-    );
+    const key = createCacheKey(token, "student", String(id));
 
     return getCached(key, loader);
 }
 
 
-export async function createStudent(fetch, token, payload) {
-
-    const result = await apiRequest(fetch, {
+export async function createStudent(token, payload) {
+    const result = await apiRequest({
         method: "POST",
         path: "/students",
         body: payload,
@@ -79,9 +66,8 @@ export async function createStudent(fetch, token, payload) {
 }
 
 
-export async function updateStudent(fetch, token, id, payload) {
-
-    const result = await apiRequest(fetch, {
+export async function updateStudent(token, id, payload) {
+    const result = await apiRequest({
         method: "PUT",
         path: `/students/${id}`,
         body: payload,
@@ -94,9 +80,8 @@ export async function updateStudent(fetch, token, id, payload) {
 }
 
 
-export async function deleteStudent(fetch, token, id) {
-
-    const result = await apiRequest(fetch, {
+export async function deleteStudent(token, id) {
+    const result = await apiRequest({
         method: "DELETE",
         path: `/students/${id}`,
         token

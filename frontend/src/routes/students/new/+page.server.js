@@ -16,7 +16,7 @@ export function load({locals}) {
 
 
 export const actions = {
-    default: async ({request, locals, fetch}) => {
+    default: async ({request, locals}) => {
 
         if (locals.user?.role !== "ADMIN") {
             return fail(403, {
@@ -34,7 +34,6 @@ export const actions = {
 
         try {
             created = await createStudent(
-                fetch,
                 locals.token,
                 payload
             );

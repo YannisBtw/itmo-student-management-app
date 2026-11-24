@@ -43,7 +43,7 @@ function readBoolean(params, name) {
 }
 
 
-export async function load({url, locals, fetch}) {
+export async function load({url, locals}) {
     const params = url.searchParams;
 
     const query = {
@@ -82,7 +82,6 @@ export async function load({url, locals, fetch}) {
 
     try {
         const students = await listStudents(
-            fetch,
             locals.token,
             query
         );

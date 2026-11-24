@@ -9,7 +9,7 @@ import {readStudentForm} from
         "$lib/server/studentForm.js";
 
 
-export async function load({params, locals, fetch}) {
+export async function load({params, locals}) {
 
     if (locals.user?.role !== "ADMIN") {
         throw redirect(303, "/students");
@@ -17,7 +17,6 @@ export async function load({params, locals, fetch}) {
 
     try {
         const student = await getStudent(
-            fetch,
             locals.token,
             params.id
         );
@@ -34,7 +33,7 @@ export async function load({params, locals, fetch}) {
 
 
 export const actions = {
-    default: async ({request, params, locals, fetch}) => {
+    default: async ({request, params, locals}) => {
 
         if (locals.user?.role !== "ADMIN") {
             return fail(403, {
@@ -50,7 +49,6 @@ export const actions = {
 
         try {
             await updateStudent(
-                fetch,
                 locals.token,
                 params.id,
                 payload

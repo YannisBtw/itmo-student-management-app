@@ -70,8 +70,18 @@ export function clearAuthCookies(cookies) {
 }
 
 
-export async function login(fetch, cookies, credentials) {
-    const response = await apiRequest(fetch, {
+export async function register(credentials) {
+    return apiRequest({
+        method: "POST",
+        path: "/auth/register",
+        body: credentials,
+        auth: false
+    });
+}
+
+
+export async function login(cookies, credentials) {
+    const response = await apiRequest({
         method: "POST",
         path: "/auth/login",
         body: credentials,
@@ -83,14 +93,14 @@ export async function login(fetch, cookies, credentials) {
 }
 
 
-export async function refreshTokens(fetch, cookies) {
+export async function refreshTokens(cookies) {
     const refreshToken = readRefresh(cookies);
 
     if (!refreshToken) {
         return false;
     }
 
-    const response = await apiRequest(fetch, {
+    const response = await apiRequest({
         method: "POST",
         path: "/auth/refresh",
         cookieHeader: `${REFRESH_COOKIE}=${refreshToken}`,
@@ -104,14 +114,14 @@ export async function refreshTokens(fetch, cookies) {
 }
 
 
-export async function loadCurrentUser(fetch, cookies) {
+export async function loadCurrentUser(cookies) {
     const token = readToken(cookies);
 
     if (!token) {
         return null;
     }
 
-    return apiRequest(fetch, {
+    return apiRequest({
         method: "GET",
         path: "/auth/me",
         token
@@ -119,10 +129,10 @@ export async function loadCurrentUser(fetch, cookies) {
 }
 
 
-export async function logout(fetch, cookies) {
+export async function logout(cookies) {
     const refreshToken = readRefresh(cookies);
 
-    await apiRequest(fetch, {
+    await apiRequest({
         method: "POST",
         path: "/auth/logout",
         cookieHeader: refreshToken

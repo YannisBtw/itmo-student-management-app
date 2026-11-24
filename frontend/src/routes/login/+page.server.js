@@ -3,7 +3,7 @@ import {login} from "$lib/server/auth.js";
 
 
 export const actions = {
-    default: async ({request, cookies, fetch, url}) => {
+    default: async ({request, cookies, url}) => {
 
         const form = await request.formData();
 
@@ -21,7 +21,7 @@ export const actions = {
         }
 
         try {
-            await login(fetch, cookies, {
+            await login(cookies, {
                 usernameOrEmail,
                 password
             });
